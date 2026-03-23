@@ -52,3 +52,11 @@ docker compose up --build
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8080
 ```
+
+# Instructions
+
+whenever you use a custom instruction in the `.github/instructions` directory, make sure to state which instruction(s) you are using and why. For example:
+
+```md
+I am working on the repository layer. I will use the instruction in `.github/instructions/repository.md` to guide my implementation because it provides the necessary steps and best practices for updating the repository layer.
+```
