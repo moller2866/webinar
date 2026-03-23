@@ -1,0 +1,95 @@
+package service
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/webinar/backend/internal/model"
+	"github.com/webinar/backend/internal/repository"
+)
+
+type PostService struct {
+	posts    repository.PostRepository
+	comments repository.CommentRepository
+}
+
+func NewPostService(posts repository.PostRepository, comments repository.CommentRepository) *PostService {
+	return &PostService{posts: posts, comments: comments}
+}
+
+func (s *PostService) ListPosts() ([]model.Post, error) {
+	return s.posts.GetAll()
+}
+
+func (s *PostService) GetPost(id int64) (*model.Post, error) {
+	post, err := s.posts.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if post == nil {
+		return nil, &model.ValidationError{Message: fmt.Sprintf("post %d not found", id)}
+	}
+
+	comments, err := s.comments.GetByPostID(id)
+	if err != nil {
+		return nil, err
+	}
+	post.Comments = comments
+	return post, nil
+}
+
+func (s *PostService) CreatePost(post *model.Post) error {
+	if post.Title == "" {
+		return &model.ValidationError{Message: "title is required"}
+	}
+	if post.Content == "" {
+		return &model.ValidationError{Message: "content is required"}
+	}
+	if post.Author == "" {
+		return &model.ValidationError{Message: "author is required"}
+	}
+	post.CreatedAt = time.Now()
+	return s.posts.Create(post)
+}
+
+func (s *PostService) LikePost(id int64) error {
+	post, err := s.posts.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if post == nil {
+		return &model.ValidationError{Message: fmt.Sprintf("post %d not found", id)}
+	}
+	return s.posts.IncrementLikes(id)
+}
+
+func (s *PostService) DislikePost(id int64) error {
+	post, err := s.posts.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if post == nil {
+		return &model.ValidationError{Message: fmt.Sprintf("post %d not found", id)}
+	}
+	return s.posts.IncrementDislikes(id)
+}
+
+func (s *PostService) AddComment(comment *model.Comment) error {
+	if comment.Author == "" {
+		return &model.ValidationError{Message: "author is required"}
+	}
+	if comment.Content == "" {
+		return &model.ValidationError{Message: "content is required"}
+	}
+
+	post, err := s.posts.GetByID(comment.PostID)
+	if err != nil {
+		return err
+	}
+	if post == nil {
+		return &model.ValidationError{Message: fmt.Sprintf("post %d not found", comment.PostID)}
+	}
+
+	comment.CreatedAt = time.Now()
+	return s.comments.Create(comment)
+}
