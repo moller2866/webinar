@@ -11,19 +11,19 @@ import (
 )
 
 func main() {
-	dbPath := "blog.db"
-	if v := os.Getenv("DB_PATH"); v != "" {
-		dbPath = v
+	databaseURL := "postgres://blog:blog@localhost:5432/blog?sslmode=disable"
+	if v := os.Getenv("DATABASE_URL"); v != "" {
+		databaseURL = v
 	}
 
-	db, err := repository.NewSQLiteDB(dbPath)
+	db, err := repository.NewPostgresDB(databaseURL)
 	if err != nil {
 		log.Fatal("failed to open database:", err)
 	}
 	defer db.Close()
 
-	postRepo := repository.NewSQLitePostRepository(db)
-	commentRepo := repository.NewSQLiteCommentRepository(db)
+	postRepo := repository.NewPostgresPostRepository(db)
+	commentRepo := repository.NewPostgresCommentRepository(db)
 
 	postService := service.NewPostService(postRepo, commentRepo)
 

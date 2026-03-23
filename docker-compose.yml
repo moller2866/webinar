@@ -1,12 +1,29 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: blog
+      POSTGRES_PASSWORD: blog
+      POSTGRES_DB: blog
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     ports:
       - "8080:8080"
-    volumes:
-      - blog-data:/app/data
     environment:
-      - DB_PATH=/app/data/blog.db
+      DATABASE_URL: postgres://blog:blog@postgres:5432/blog?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -16,4 +33,4 @@ services:
       - backend
 
 volumes:
-  blog-data:
+  pgdata:
