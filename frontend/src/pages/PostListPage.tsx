@@ -23,7 +23,7 @@ export default function PostListPage() {
 
   useEffect(() => {
     getPosts()
-      .then(setPosts)
+      .then((data) => setPosts(data ?? []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);

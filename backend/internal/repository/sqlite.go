@@ -82,7 +82,7 @@ func (r *SQLitePostRepository) GetAll() ([]model.Post, error) {
 	}
 	defer rows.Close()
 
-	var posts []model.Post
+	posts := []model.Post{}
 	for rows.Next() {
 		var p model.Post
 		var createdAt string
@@ -163,7 +163,7 @@ func (r *SQLiteCommentRepository) GetByPostID(postID int64) ([]model.Comment, er
 	}
 	defer rows.Close()
 
-	var comments []model.Comment
+	comments := []model.Comment{}
 	for rows.Next() {
 		var c model.Comment
 		var createdAt string
