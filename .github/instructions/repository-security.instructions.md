@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or modifying repository package code — sqlite.go, repository.go, or any database query. Covers SQL injection prevention, query safety, schema conventions, and SQLite-specific best practices."
+description: "Use when writing or modifying repository package code — postgres.go, repository.go, or any database query. Covers SQL injection prevention, query safety, schema conventions, and PostgreSQL-specific best practices."
 applyTo: "backend/internal/repository/**/*.go"
 ---
 
@@ -7,14 +7,14 @@ applyTo: "backend/internal/repository/**/*.go"
 
 ## SQL Injection — Always Use Parameterised Queries
 
-Never interpolate values into SQL strings. Always use `?` placeholders and pass values as arguments.
+Never interpolate values into SQL strings. Always use numbered `$1`, `$2`, ... placeholders and pass values as arguments.
 
 ```go
 // WRONG — SQL injection risk
 db.Query("SELECT * FROM posts WHERE author = '" + author + "'")
 
 // CORRECT
-db.Query("SELECT id, title FROM posts WHERE author = ?", author)
+db.Query("SELECT id, title FROM posts WHERE author = $1", author)
 ```
 
 This applies to every call: `db.Query`, `db.QueryRow`, `db.Exec`.
@@ -37,10 +37,10 @@ Never use `SELECT *`. List columns explicitly. This prevents accidentally exposi
 
 ```go
 // WRONG
-db.Query("SELECT * FROM posts WHERE id = ?", id)
+db.Query("SELECT * FROM posts WHERE id = $1", id)
 
 // CORRECT
-db.QueryRow("SELECT id, title, content, author, likes, dislikes, created_at FROM posts WHERE id = ?", id)
+db.QueryRow("SELECT id, title, content, author, likes, dislikes, created_at FROM posts WHERE id = $1", id)
 ```
 
 ## Close Rows Immediately with defer
@@ -60,7 +60,7 @@ return results, rows.Err()
 
 ## Use Foreign Keys
 
-`FOREIGN KEY` constraints are enabled via `PRAGMA foreign_keys=ON` in `NewSQLiteDB`. All new tables with FK relationships must declare them in the schema — do not rely on application-level enforcement alone.
+PostgreSQL enforces `FOREIGN KEY` constraints natively. All new tables with FK relationships must declare them in the schema — do not rely on application-level enforcement alone.
 
 ## Schema Changes
 
@@ -79,10 +79,10 @@ Use SQL arithmetic for counters — never read-then-write:
 ```go
 // WRONG — race condition
 post.Likes++
-db.Exec("UPDATE posts SET likes = ? WHERE id = ?", post.Likes, id)
+db.Exec("UPDATE posts SET likes = $1 WHERE id = $2", post.Likes, id)
 
 // CORRECT — atomic
-db.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", id)
+db.Exec("UPDATE posts SET likes = likes + 1 WHERE id = $1", id)
 ```
 
 ## Limit Result Sets
@@ -95,4 +95,4 @@ db.Query("SELECT ... FROM posts ORDER BY created_at DESC LIMIT 100")
 
 ## No SQL Outside This Package
 
-SQL strings must only appear in `repository/sqlite.go`. No other package may import `database/sql` or construct queries. The interfaces in `repository.go` are the only contract exposed to the rest of the application.
+SQL strings must only appear in `repository/postgres.go`. No other package may import `database/sql` or construct queries. The interfaces in `repository.go` are the only contract exposed to the rest of the application.
