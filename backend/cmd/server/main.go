@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/webinar/backend/internal/handler"
 	"github.com/webinar/backend/internal/repository"
@@ -10,7 +11,12 @@ import (
 )
 
 func main() {
-	db, err := repository.NewSQLiteDB("blog.db")
+	dbPath := "blog.db"
+	if v := os.Getenv("DB_PATH"); v != "" {
+		dbPath = v
+	}
+
+	db, err := repository.NewSQLiteDB(dbPath)
 	if err != nil {
 		log.Fatal("failed to open database:", err)
 	}

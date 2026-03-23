@@ -18,14 +18,23 @@ backend/
 
 ## Quick Start
 
-### Backend
+### Docker (recommended)
+```bash
+docker compose up --build
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8080
+```
+
+### Local Development
+
+#### Backend
 ```bash
 cd backend
 go run ./cmd/server
 # Server starts on :8080
 ```
 
-### Frontend
+#### Frontend
 ```bash
 cd frontend
 npm install

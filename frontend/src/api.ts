@@ -1,6 +1,6 @@
 import type { Post, Comment, CreatePostRequest, CreateCommentRequest } from './types';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080/api';
 
 export async function getPosts(): Promise<Post[]> {
   const response = await fetch(`${API_BASE}/posts`);
