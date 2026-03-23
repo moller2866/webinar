@@ -1,6 +1,6 @@
 # Blog Application — Three-Layer Monorepo
 
-A teaching/demo blog application demonstrating clean three-layer architecture:
+A blog application demonstrating clean three-layer architecture:
 **Frontend** (React + TypeScript + MUI) → **Backend** (Go) → **Persistence** (SQLite)
 
 ## Architecture
