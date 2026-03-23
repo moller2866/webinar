@@ -43,3 +43,13 @@ export async function dislikePost(id: number): Promise<void> {
   const response = await fetch(`${API_BASE}/posts/${id}/dislike`, { method: 'POST' });
   if (!response.ok) throw new Error('Failed to dislike post');
 }
+
+export async function likeComment(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/comments/${id}/like`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to like comment');
+}
+
+export async function dislikeComment(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/comments/${id}/dislike`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to dislike comment');
+}

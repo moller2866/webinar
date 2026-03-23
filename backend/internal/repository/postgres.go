@@ -50,10 +50,15 @@ func initSchema(db *sql.DB) error {
 		post_id BIGINT NOT NULL REFERENCES posts(id),
 		author TEXT NOT NULL,
 		content TEXT NOT NULL,
+		likes INTEGER NOT NULL DEFAULT 0,
+		dislikes INTEGER NOT NULL DEFAULT 0,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);`
+	CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
+
+	ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE comments ADD COLUMN IF NOT EXISTS dislikes INTEGER NOT NULL DEFAULT 0;`
 
 	_, err := db.Exec(schema)
 	return err
@@ -134,7 +139,7 @@ func NewPostgresCommentRepository(db *sql.DB) *PostgresCommentRepository {
 
 func (r *PostgresCommentRepository) GetByPostID(postID int64) ([]model.Comment, error) {
 	rows, err := r.db.Query(
-		"SELECT id, post_id, author, content, created_at FROM comments WHERE post_id = $1 ORDER BY created_at ASC",
+		"SELECT id, post_id, author, content, likes, dislikes, created_at FROM comments WHERE post_id = $1 ORDER BY created_at ASC",
 		postID,
 	)
 	if err != nil {
@@ -145,12 +150,37 @@ func (r *PostgresCommentRepository) GetByPostID(postID int64) ([]model.Comment, 
 	comments := []model.Comment{}
 	for rows.Next() {
 		var c model.Comment
-		if err := rows.Scan(&c.ID, &c.PostID, &c.Author, &c.Content, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.PostID, &c.Author, &c.Content, &c.Likes, &c.Dislikes, &c.CreatedAt); err != nil {
 			return nil, err
 		}
 		comments = append(comments, c)
 	}
 	return comments, rows.Err()
+}
+
+func (r *PostgresCommentRepository) GetByID(id int64) (*model.Comment, error) {
+	row := r.db.QueryRow(
+		"SELECT id, post_id, author, content, likes, dislikes, created_at FROM comments WHERE id = $1", id,
+	)
+	var c model.Comment
+	err := row.Scan(&c.ID, &c.PostID, &c.Author, &c.Content, &c.Likes, &c.Dislikes, &c.CreatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func (r *PostgresCommentRepository) IncrementLikes(id int64) error {
+	_, err := r.db.Exec("UPDATE comments SET likes = likes + 1 WHERE id = $1", id)
+	return err
+}
+
+func (r *PostgresCommentRepository) IncrementDislikes(id int64) error {
+	_, err := r.db.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = $1", id)
+	return err
 }
 
 func (r *PostgresCommentRepository) Create(comment *model.Comment) error {

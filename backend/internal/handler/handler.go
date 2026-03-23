@@ -44,6 +44,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/posts/{id}/comments", h.addComment)
 	mux.HandleFunc("POST /api/posts/{id}/like", h.likePost)
 	mux.HandleFunc("POST /api/posts/{id}/dislike", h.dislikePost)
+	mux.HandleFunc("POST /api/comments/{id}/like", h.likeComment)
+	mux.HandleFunc("POST /api/comments/{id}/dislike", h.dislikeComment)
 }
 
 // --- Handlers ---
@@ -140,6 +142,32 @@ func (h *Handler) dislikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.postService.DislikePost(id); err != nil {
+		handleServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (h *Handler) likeComment(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid comment id")
+		return
+	}
+	if err := h.postService.LikeComment(id); err != nil {
+		handleServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (h *Handler) dislikeComment(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid comment id")
+		return
+	}
+	if err := h.postService.DislikeComment(id); err != nil {
 		handleServiceError(w, err)
 		return
 	}

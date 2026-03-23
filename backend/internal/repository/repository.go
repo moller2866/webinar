@@ -12,5 +12,8 @@ type PostRepository interface {
 
 type CommentRepository interface {
 	GetByPostID(postID int64) ([]model.Comment, error)
+	GetByID(id int64) (*model.Comment, error)
 	Create(comment *model.Comment) error
+	IncrementLikes(id int64) error
+	IncrementDislikes(id int64) error
 }

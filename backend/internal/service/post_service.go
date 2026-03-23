@@ -93,3 +93,25 @@ func (s *PostService) AddComment(comment *model.Comment) error {
 	comment.CreatedAt = time.Now()
 	return s.comments.Create(comment)
 }
+
+func (s *PostService) LikeComment(id int64) error {
+	comment, err := s.comments.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if comment == nil {
+		return &model.ValidationError{Message: fmt.Sprintf("comment %d not found", id)}
+	}
+	return s.comments.IncrementLikes(id)
+}
+
+func (s *PostService) DislikeComment(id int64) error {
+	comment, err := s.comments.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if comment == nil {
+		return &model.ValidationError{Message: fmt.Sprintf("comment %d not found", id)}
+	}
+	return s.comments.IncrementDislikes(id)
+}

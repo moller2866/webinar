@@ -28,6 +28,8 @@ All endpoints are defined in `backend/internal/handler/handler.go` and wired in 
 | POST   | /api/posts/{id}/comments    | Add comment to post   |
 | POST   | /api/posts/{id}/like        | Increment likes       |
 | POST   | /api/posts/{id}/dislike     | Increment dislikes    |
+| POST   | /api/comments/{id}/like     | Like a comment        |
+| POST   | /api/comments/{id}/dislike  | Dislike a comment     |
 
 ## Key Design Decisions
 

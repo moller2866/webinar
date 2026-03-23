@@ -18,6 +18,8 @@ type Comment struct {
 	PostID    int64     `json:"postId"`
 	Author    string    `json:"author"`
 	Content   string    `json:"content"`
+	Likes     int       `json:"likes"`
+	Dislikes  int       `json:"dislikes"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

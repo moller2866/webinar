@@ -16,7 +16,7 @@ import {
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import type { Post } from '../types';
-import { getPost, likePost, dislikePost, createComment } from '../api';
+import { getPost, likePost, dislikePost, createComment, likeComment, dislikeComment } from '../api';
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +51,44 @@ export default function PostDetailPage() {
     setPost((prev) => (prev ? { ...prev, dislikes: prev.dislikes + 1 } : prev));
     try {
       await dislikePost(post.id);
+    } catch {
+      fetchPost();
+    }
+  };
+
+  const handleLikeComment = async (commentId: number) => {
+    if (!post) return;
+    setPost((prev) =>
+      prev
+        ? {
+            ...prev,
+            comments: prev.comments?.map((c) =>
+              c.id === commentId ? { ...c, likes: c.likes + 1 } : c
+            ),
+          }
+        : prev
+    );
+    try {
+      await likeComment(commentId);
+    } catch {
+      fetchPost();
+    }
+  };
+
+  const handleDislikeComment = async (commentId: number) => {
+    if (!post) return;
+    setPost((prev) =>
+      prev
+        ? {
+            ...prev,
+            comments: prev.comments?.map((c) =>
+              c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c
+            ),
+          }
+        : prev
+    );
+    try {
+      await dislikeComment(commentId);
     } catch {
       fetchPost();
     }
@@ -124,6 +162,16 @@ export default function PostDetailPage() {
               <Typography variant="body2" sx={{ mt: 1 }}>
                 {comment.content}
               </Typography>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                <IconButton size="small" onClick={() => handleLikeComment(comment.id)} color="primary">
+                  <ThumbUpIcon fontSize="small" />
+                </IconButton>
+                <Typography variant="body2">{comment.likes}</Typography>
+                <IconButton size="small" onClick={() => handleDislikeComment(comment.id)} color="error">
+                  <ThumbDownIcon fontSize="small" />
+                </IconButton>
+                <Typography variant="body2">{comment.dislikes}</Typography>
+              </Stack>
             </CardContent>
           </Card>
         ))
