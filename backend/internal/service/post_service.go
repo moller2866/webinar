@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/webinar/backend/internal/model"
@@ -48,6 +49,7 @@ func (s *PostService) CreatePost(post *model.Post) error {
 	if post.Author == "" {
 		return &model.ValidationError{Message: "author is required"}
 	}
+	post.Tags = sanitizeTags(post.Tags)
 	post.CreatedAt = time.Now()
 	return s.posts.Create(post)
 }
@@ -114,4 +116,19 @@ func (s *PostService) DislikeComment(id int64) error {
 		return &model.ValidationError{Message: fmt.Sprintf("comment %d not found", id)}
 	}
 	return s.comments.IncrementDislikes(id)
+}
+
+// sanitizeTags trims whitespace from each tag, removes empty strings, and deduplicates.
+func sanitizeTags(in []string) []string {
+	seen := make(map[string]bool)
+	out := []string{}
+	for _, t := range in {
+		t = strings.TrimSpace(t)
+		if t == "" || seen[t] {
+			continue
+		}
+		seen[t] = true
+		out = append(out, t)
+	}
+	return out
 }

@@ -8,14 +8,19 @@ export default function NewPostPage() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [content, setContent] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !author.trim() || !content.trim()) return;
     setSubmitting(true);
+    const tags = tagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
     try {
-      const post = await createPost({ title, author, content });
+      const post = await createPost({ title, author, content, tags });
       navigate(`/posts/${post.id}`);
     } catch (err) {
       console.error(err);
@@ -52,6 +57,13 @@ export default function NewPostPage() {
             fullWidth
             multiline
             rows={6}
+          />
+          <TextField
+            label="Tags (comma-separated, optional)"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            fullWidth
+            placeholder="e.g. go, react, tutorial"
           />
           <Button type="submit" variant="contained" size="large" disabled={submitting}>
             {submitting ? 'Publishing…' : 'Publish'}

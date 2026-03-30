@@ -14,9 +14,10 @@ import (
 // Request/response DTOs
 
 type CreatePostRequest struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Author  string `json:"author"`
+	Title   string   `json:"title"`
+	Content string   `json:"content"`
+	Author  string   `json:"author"`
+	Tags    []string `json:"tags"`
 }
 
 type CreateCommentRequest struct {
@@ -71,6 +72,7 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		Title:   req.Title,
 		Content: req.Content,
 		Author:  req.Author,
+		Tags:    req.Tags,
 	}
 
 	if err := h.postService.CreatePost(post); err != nil {

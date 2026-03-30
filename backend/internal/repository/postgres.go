@@ -5,6 +5,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/lib/pq"
 
 	"github.com/webinar/backend/internal/model"
 )
@@ -58,7 +59,11 @@ func initSchema(db *sql.DB) error {
 	CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 
 	ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes INTEGER NOT NULL DEFAULT 0;
-	ALTER TABLE comments ADD COLUMN IF NOT EXISTS dislikes INTEGER NOT NULL DEFAULT 0;`
+	ALTER TABLE comments ADD COLUMN IF NOT EXISTS dislikes INTEGER NOT NULL DEFAULT 0;
+
+	ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}';
+
+	CREATE INDEX IF NOT EXISTS idx_posts_tags ON posts USING GIN(tags);`
 
 	_, err := db.Exec(schema)
 	return err
@@ -76,7 +81,7 @@ func NewPostgresPostRepository(db *sql.DB) *PostgresPostRepository {
 
 func (r *PostgresPostRepository) GetAll() ([]model.Post, error) {
 	rows, err := r.db.Query(
-		"SELECT id, title, content, author, likes, dislikes, created_at FROM posts ORDER BY created_at DESC",
+		"SELECT id, title, content, author, tags, likes, dislikes, created_at FROM posts ORDER BY created_at DESC",
 	)
 	if err != nil {
 		return nil, err
@@ -86,9 +91,11 @@ func (r *PostgresPostRepository) GetAll() ([]model.Post, error) {
 	posts := []model.Post{}
 	for rows.Next() {
 		var p model.Post
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.Author, &p.Likes, &p.Dislikes, &p.CreatedAt); err != nil {
+		var tags pq.StringArray
+		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.Author, &tags, &p.Likes, &p.Dislikes, &p.CreatedAt); err != nil {
 			return nil, err
 		}
+		p.Tags = []string(tags)
 		posts = append(posts, p)
 	}
 	return posts, rows.Err()
@@ -96,24 +103,26 @@ func (r *PostgresPostRepository) GetAll() ([]model.Post, error) {
 
 func (r *PostgresPostRepository) GetByID(id int64) (*model.Post, error) {
 	row := r.db.QueryRow(
-		"SELECT id, title, content, author, likes, dislikes, created_at FROM posts WHERE id = $1", id,
+		"SELECT id, title, content, author, tags, likes, dislikes, created_at FROM posts WHERE id = $1", id,
 	)
 
 	var p model.Post
-	err := row.Scan(&p.ID, &p.Title, &p.Content, &p.Author, &p.Likes, &p.Dislikes, &p.CreatedAt)
+	var tags pq.StringArray
+	err := row.Scan(&p.ID, &p.Title, &p.Content, &p.Author, &tags, &p.Likes, &p.Dislikes, &p.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
+	p.Tags = []string(tags)
 	return &p, nil
 }
 
 func (r *PostgresPostRepository) Create(post *model.Post) error {
 	return r.db.QueryRow(
-		"INSERT INTO posts (title, content, author, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
-		post.Title, post.Content, post.Author, post.CreatedAt,
+		"INSERT INTO posts (title, content, author, tags, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		post.Title, post.Content, post.Author, pq.StringArray(post.Tags), post.CreatedAt,
 	).Scan(&post.ID)
 }
 
