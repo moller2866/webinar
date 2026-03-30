@@ -1,7 +1,7 @@
 # Blog Application — Three-Layer Monorepo
 
 A blog application demonstrating clean three-layer architecture:
-**Frontend** (React + TypeScript + MUI) → **Backend** (Go) → **Persistence** (SQLite)
+**Frontend** (React + TypeScript + MUI) → **Backend** (Go) → **Persistence** (PostgreSQL)
 
 ## Architecture
 
@@ -12,7 +12,7 @@ backend/
   internal/
     handler/       → HTTP handlers (transport layer)
     service/       → Business logic
-    repository/    → Data access (SQLite, repository pattern)
+    repository/    → Data access (PostgreSQL, repository pattern)
     model/         → Domain types
 ```
 
