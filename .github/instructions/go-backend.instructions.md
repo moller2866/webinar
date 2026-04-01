@@ -10,7 +10,7 @@ applyTo: "backend/**/*.go"
 | Package | Owns | Must NOT |
 |---------|------|----------|
 | `model/` | Domain structs (`Post`, `Comment`, `ValidationError`) | Touch SQL or HTTP |
-| `repository/` | Interfaces in `repository.go` + SQLite implementations in `sqlite.go` | Contain business logic |
+| `repository/` | Interfaces in `repository.go` + PostgreSQL implementations in `postgres.go` | Contain business logic |
 | `service/` | Business logic, validation, orchestration | Touch `net/http` or SQL directly |
 | `handler/` | HTTP request/response DTOs, parsing, routing | Contain business logic |
 
@@ -23,7 +23,7 @@ func NewPostService(posts repository.PostRepository, comments repository.Comment
 func NewHandler(postService *service.PostService) *Handler
 ```
 
-Never instantiate concrete repository types (e.g. `SQLitePostRepository`) outside of `main.go`.
+Never instantiate concrete repository types (e.g. `PostgresPostRepository`) outside of `main.go`.
 
 ## Error Handling
 
@@ -55,10 +55,10 @@ Extract path values with `r.PathValue("id")`. Do not introduce chi, gin, or gori
 
 When adding a new data operation:
 1. Add the method to the interface in `repository/repository.go` **first**
-2. Implement it in `repository/sqlite.go`
+2. Implement it in `repository/postgres.go`
 3. Consume it in the service layer — never call SQL from outside `repository/`
 
-## SQLite
+## PostgreSQL
 
-Driver: `modernc.org/sqlite` — pure Go, no CGO required.
-Use the `database/sql` standard interface. Never import the driver directly outside `repository/sqlite.go`.
+Driver: `jackc/pgx/v5` via the standard `database/sql` interface.
+Never import the driver directly outside `repository/postgres.go`.
