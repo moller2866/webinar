@@ -16,7 +16,14 @@ import {
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import type { Post } from '../types';
-import { getPost, likePost, dislikePost, createComment, likeComment, dislikeComment } from '../api';
+import {
+  getPost,
+  upvotePost,
+  downvotePost,
+  createComment,
+  upvoteComment,
+  downvoteComment,
+} from '../api';
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,27 +43,27 @@ export default function PostDetailPage() {
 
   useEffect(fetchPost, [id]);
 
-  const handleLike = async () => {
+  const handleUpvote = async () => {
     if (!post) return;
     setPost((prev) => (prev ? { ...prev, likes: prev.likes + 1 } : prev));
     try {
-      await likePost(post.id);
+      await upvotePost(post.id);
     } catch {
       fetchPost();
     }
   };
 
-  const handleDislike = async () => {
+  const handleDownvote = async () => {
     if (!post) return;
     setPost((prev) => (prev ? { ...prev, dislikes: prev.dislikes + 1 } : prev));
     try {
-      await dislikePost(post.id);
+      await downvotePost(post.id);
     } catch {
       fetchPost();
     }
   };
 
-  const handleLikeComment = async (commentId: number) => {
+  const handleUpvoteComment = async (commentId: number) => {
     if (!post) return;
     setPost((prev) =>
       prev
@@ -69,13 +76,13 @@ export default function PostDetailPage() {
         : prev
     );
     try {
-      await likeComment(commentId);
+      await upvoteComment(commentId);
     } catch {
       fetchPost();
     }
   };
 
-  const handleDislikeComment = async (commentId: number) => {
+  const handleDownvoteComment = async (commentId: number) => {
     if (!post) return;
     setPost((prev) =>
       prev
@@ -88,7 +95,7 @@ export default function PostDetailPage() {
         : prev
     );
     try {
-      await dislikeComment(commentId);
+      await downvoteComment(commentId);
     } catch {
       fetchPost();
     }
@@ -137,11 +144,11 @@ export default function PostDetailPage() {
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 3 }}>
-          <IconButton onClick={handleLike} color="primary">
+          <IconButton onClick={handleUpvote} color="primary" aria-label="upvote post">
             <ThumbUpIcon />
           </IconButton>
           <Typography>{post.likes}</Typography>
-          <IconButton onClick={handleDislike} color="error">
+          <IconButton onClick={handleDownvote} color="error" aria-label="downvote post">
             <ThumbDownIcon />
           </IconButton>
           <Typography>{post.dislikes}</Typography>
@@ -163,11 +170,21 @@ export default function PostDetailPage() {
                 {comment.content}
               </Typography>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                <IconButton size="small" onClick={() => handleLikeComment(comment.id)} color="primary">
+                <IconButton
+                  size="small"
+                  onClick={() => handleUpvoteComment(comment.id)}
+                  color="primary"
+                  aria-label="upvote comment"
+                >
                   <ThumbUpIcon fontSize="small" />
                 </IconButton>
                 <Typography variant="body2">{comment.likes}</Typography>
-                <IconButton size="small" onClick={() => handleDislikeComment(comment.id)} color="error">
+                <IconButton
+                  size="small"
+                  onClick={() => handleDownvoteComment(comment.id)}
+                  color="error"
+                  aria-label="downvote comment"
+                >
                   <ThumbDownIcon fontSize="small" />
                 </IconButton>
                 <Typography variant="body2">{comment.dislikes}</Typography>

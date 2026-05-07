@@ -26,10 +26,10 @@ All endpoints are defined in `backend/internal/handler/handler.go` and wired in 
 | POST   | /api/posts                  | Create a post         |
 | GET    | /api/posts/{id}             | Get post + comments   |
 | POST   | /api/posts/{id}/comments    | Add comment to post   |
-| POST   | /api/posts/{id}/like        | Increment likes       |
-| POST   | /api/posts/{id}/dislike     | Increment dislikes    |
-| POST   | /api/comments/{id}/like     | Like a comment        |
-| POST   | /api/comments/{id}/dislike  | Dislike a comment     |
+| POST   | /api/posts/{id}/upvote      | Increment upvotes     |
+| POST   | /api/posts/{id}/downvote    | Increment downvotes   |
+| POST   | /api/comments/{id}/upvote   | Upvote a comment      |
+| POST   | /api/comments/{id}/downvote | Downvote a comment    |
 
 ## Key Design Decisions
 
