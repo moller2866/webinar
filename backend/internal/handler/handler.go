@@ -14,15 +14,15 @@ import (
 // Request/response DTOs
 
 type CreatePostRequest struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	Author  string   `json:"author"`
-	Tags    []string `json:"tags"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	CategoryID *int64   `json:"categoryId"`
+	Images     []string `json:"images"`
 }
 
 type CreateCommentRequest struct {
-	Author  string `json:"author"`
-	Content string `json:"content"`
+	Content  string `json:"content"`
+	ParentID *int64 `json:"parentId"`
 }
 
 type ErrorResponse struct {
@@ -43,10 +43,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/posts", h.createPost)
 	mux.HandleFunc("GET /api/posts/{id}", h.getPost)
 	mux.HandleFunc("POST /api/posts/{id}/comments", h.addComment)
-	mux.HandleFunc("POST /api/posts/{id}/like", h.likePost)
-	mux.HandleFunc("POST /api/posts/{id}/dislike", h.dislikePost)
-	mux.HandleFunc("POST /api/comments/{id}/like", h.likeComment)
-	mux.HandleFunc("POST /api/comments/{id}/dislike", h.dislikeComment)
 }
 
 // --- Handlers ---
@@ -69,10 +65,10 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := &model.Post{
-		Title:   req.Title,
-		Content: req.Content,
-		Author:  req.Author,
-		Tags:    req.Tags,
+		Title:      req.Title,
+		Content:    req.Content,
+		CategoryID: req.CategoryID,
+		Images:     req.Images,
 	}
 
 	if err := h.postService.CreatePost(post); err != nil {
@@ -112,9 +108,9 @@ func (h *Handler) addComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment := &model.Comment{
-		PostID:  id,
-		Author:  req.Author,
-		Content: req.Content,
+		PostID:   id,
+		Content:  req.Content,
+		ParentID: req.ParentID,
 	}
 
 	if err := h.postService.AddComment(comment); err != nil {
@@ -122,58 +118,6 @@ func (h *Handler) addComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, comment)
-}
-
-func (h *Handler) likePost(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid post id")
-		return
-	}
-	if err := h.postService.LikePost(id); err != nil {
-		handleServiceError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (h *Handler) dislikePost(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid post id")
-		return
-	}
-	if err := h.postService.DislikePost(id); err != nil {
-		handleServiceError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (h *Handler) likeComment(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid comment id")
-		return
-	}
-	if err := h.postService.LikeComment(id); err != nil {
-		handleServiceError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (h *Handler) dislikeComment(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid comment id")
-		return
-	}
-	if err := h.postService.DislikeComment(id); err != nil {
-		handleServiceError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 // --- Helpers ---

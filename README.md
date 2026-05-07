@@ -50,5 +50,3 @@ npm run dev
 | POST   | /api/posts                  | Create a post         |
 | GET    | /api/posts/{id}             | Get post + comments   |
 | POST   | /api/posts/{id}/comments    | Add comment to post   |
-| POST   | /api/posts/{id}/like        | Increment likes       |
-| POST   | /api/posts/{id}/dislike     | Increment dislikes    |
