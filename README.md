@@ -50,7 +50,7 @@ npm run dev
 | POST   | /api/posts                  | Create a post         |
 | GET    | /api/posts/{id}             | Get post + comments   |
 | POST   | /api/posts/{id}/comments    | Add comment to post   |
-| POST   | /api/posts/{id}/upvote      | Increment upvotes     |
-| POST   | /api/posts/{id}/downvote    | Increment downvotes   |
+| POST   | /api/posts/{id}/upvote      | Upvote a post         |
+| POST   | /api/posts/{id}/downvote    | Downvote a post       |
 | POST   | /api/comments/{id}/upvote   | Upvote a comment      |
 | POST   | /api/comments/{id}/downvote | Downvote a comment    |
