@@ -51,7 +51,7 @@ func initSchema(db *sql.DB) error {
 		name        TEXT UNIQUE NOT NULL,
 		slug        TEXT UNIQUE NOT NULL,
 		description TEXT NOT NULL DEFAULT '',
-		created_by  BIGINT REFERENCES users(id),
+		created_by  BIGINT REFERENCES users(id) ON DELETE SET NULL,
 		created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 
@@ -59,8 +59,8 @@ func initSchema(db *sql.DB) error {
 		id          BIGSERIAL PRIMARY KEY,
 		title       TEXT NOT NULL,
 		content     TEXT NOT NULL,
-		user_id     BIGINT REFERENCES users(id),
-		category_id BIGINT REFERENCES categories(id),
+		user_id     BIGINT REFERENCES users(id) ON DELETE SET NULL,
+		category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
 		images      TEXT[] NOT NULL DEFAULT '{}',
 		created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
@@ -68,15 +68,15 @@ func initSchema(db *sql.DB) error {
 	CREATE TABLE IF NOT EXISTS comments (
 		id         BIGSERIAL PRIMARY KEY,
 		post_id    BIGINT NOT NULL REFERENCES posts(id),
-		user_id    BIGINT REFERENCES users(id),
-		parent_id  BIGINT REFERENCES comments(id),
+		user_id    BIGINT REFERENCES users(id) ON DELETE SET NULL,
+		parent_id  BIGINT REFERENCES comments(id) ON DELETE CASCADE,
 		content    TEXT NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 
 	CREATE TABLE IF NOT EXISTS votes (
 		id          BIGSERIAL PRIMARY KEY,
-		user_id     BIGINT NOT NULL REFERENCES users(id),
+		user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		target_type TEXT NOT NULL CHECK (target_type IN ('post', 'comment')),
 		target_id   BIGINT NOT NULL,
 		vote_type   TEXT NOT NULL CHECK (vote_type IN ('highfive', 'meh')),

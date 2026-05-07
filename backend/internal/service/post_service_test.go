@@ -52,7 +52,7 @@ func (m *mockPostRepository) Create(post *model.Post) error {
 type mockCommentRepository struct {
 	comments []model.Comment
 	nextID   int64
-	forceErr  error
+	forceErr error
 }
 
 func newMockCommentRepository() *mockCommentRepository {
