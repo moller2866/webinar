@@ -1,0 +1,21 @@
+{
+  "name": "sdd-plugin",
+  "description": "A plugin for Spec Driven Development (SDD)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kasper Møller",
+    "email": "kasper.moeller@eficode.com"
+  },
+  "repository": "https://www.github.com/moller2866/webinar",
+  "keywords": [
+    "spec driven development",
+    "sdd",
+    "git practices"
+  ],
+  "agents": [
+    "./.github/agents"
+  ],
+  "skills": [
+    "./.github/skills/git-practices"
+  ]
+}
