@@ -13,9 +13,9 @@
     "git practices"
   ],
   "agents": [
-    ".github/agents"
+    "./.github/agents"
   ],
   "skills": [
-    ".github/skills/git-practices"
+    "./.github/skills/git-practices"
   ]
 }
