@@ -54,7 +54,7 @@ func (s *PostService) CreatePost(post *model.Post) error {
 	return s.posts.Create(post)
 }
 
-func (s *PostService) LikePost(id int64) error {
+func (s *PostService) UpvotePost(id int64) error {
 	post, err := s.posts.GetByID(id)
 	if err != nil {
 		return err
@@ -62,10 +62,10 @@ func (s *PostService) LikePost(id int64) error {
 	if post == nil {
 		return &model.ValidationError{Message: fmt.Sprintf("post %d not found", id)}
 	}
-	return s.posts.IncrementLikes(id)
+	return s.posts.IncrementUpvotes(id)
 }
 
-func (s *PostService) DislikePost(id int64) error {
+func (s *PostService) DownvotePost(id int64) error {
 	post, err := s.posts.GetByID(id)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (s *PostService) DislikePost(id int64) error {
 	if post == nil {
 		return &model.ValidationError{Message: fmt.Sprintf("post %d not found", id)}
 	}
-	return s.posts.IncrementDislikes(id)
+	return s.posts.IncrementDownvotes(id)
 }
 
 func (s *PostService) AddComment(comment *model.Comment) error {
@@ -96,7 +96,7 @@ func (s *PostService) AddComment(comment *model.Comment) error {
 	return s.comments.Create(comment)
 }
 
-func (s *PostService) LikeComment(id int64) error {
+func (s *PostService) UpvoteComment(id int64) error {
 	comment, err := s.comments.GetByID(id)
 	if err != nil {
 		return err
@@ -104,10 +104,10 @@ func (s *PostService) LikeComment(id int64) error {
 	if comment == nil {
 		return &model.ValidationError{Message: fmt.Sprintf("comment %d not found", id)}
 	}
-	return s.comments.IncrementLikes(id)
+	return s.comments.IncrementUpvotes(id)
 }
 
-func (s *PostService) DislikeComment(id int64) error {
+func (s *PostService) DownvoteComment(id int64) error {
 	comment, err := s.comments.GetByID(id)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func (s *PostService) DislikeComment(id int64) error {
 	if comment == nil {
 		return &model.ValidationError{Message: fmt.Sprintf("comment %d not found", id)}
 	}
-	return s.comments.IncrementDislikes(id)
+	return s.comments.IncrementDownvotes(id)
 }
 
 // sanitizeTags trims whitespace from each tag, removes empty strings, and deduplicates.

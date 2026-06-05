@@ -34,22 +34,22 @@ export async function createComment(postId: number, data: CreateCommentRequest):
   return response.json();
 }
 
-export async function likePost(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE}/posts/${id}/like`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to like post');
+export async function upvotePost(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/posts/${id}/upvote`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to upvote post');
 }
 
-export async function dislikePost(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE}/posts/${id}/dislike`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to dislike post');
+export async function downvotePost(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/posts/${id}/downvote`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to downvote post');
 }
 
-export async function likeComment(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE}/comments/${id}/like`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to like comment');
+export async function upvoteComment(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/comments/${id}/upvote`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to upvote comment');
 }
 
-export async function dislikeComment(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE}/comments/${id}/dislike`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to dislike comment');
+export async function downvoteComment(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/comments/${id}/downvote`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to downvote comment');
 }

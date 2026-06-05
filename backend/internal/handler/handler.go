@@ -43,10 +43,10 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/posts", h.createPost)
 	mux.HandleFunc("GET /api/posts/{id}", h.getPost)
 	mux.HandleFunc("POST /api/posts/{id}/comments", h.addComment)
-	mux.HandleFunc("POST /api/posts/{id}/like", h.likePost)
-	mux.HandleFunc("POST /api/posts/{id}/dislike", h.dislikePost)
-	mux.HandleFunc("POST /api/comments/{id}/like", h.likeComment)
-	mux.HandleFunc("POST /api/comments/{id}/dislike", h.dislikeComment)
+	mux.HandleFunc("POST /api/posts/{id}/upvote", h.upvotePost)
+	mux.HandleFunc("POST /api/posts/{id}/downvote", h.downvotePost)
+	mux.HandleFunc("POST /api/comments/{id}/upvote", h.upvoteComment)
+	mux.HandleFunc("POST /api/comments/{id}/downvote", h.downvoteComment)
 }
 
 // --- Handlers ---
@@ -124,52 +124,52 @@ func (h *Handler) addComment(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, comment)
 }
 
-func (h *Handler) likePost(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) upvotePost(w http.ResponseWriter, r *http.Request) {
 	id, err := parseID(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid post id")
 		return
 	}
-	if err := h.postService.LikePost(id); err != nil {
+	if err := h.postService.UpvotePost(id); err != nil {
 		handleServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func (h *Handler) dislikePost(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) downvotePost(w http.ResponseWriter, r *http.Request) {
 	id, err := parseID(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid post id")
 		return
 	}
-	if err := h.postService.DislikePost(id); err != nil {
+	if err := h.postService.DownvotePost(id); err != nil {
 		handleServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func (h *Handler) likeComment(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) upvoteComment(w http.ResponseWriter, r *http.Request) {
 	id, err := parseID(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid comment id")
 		return
 	}
-	if err := h.postService.LikeComment(id); err != nil {
+	if err := h.postService.UpvoteComment(id); err != nil {
 		handleServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func (h *Handler) dislikeComment(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) downvoteComment(w http.ResponseWriter, r *http.Request) {
 	id, err := parseID(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid comment id")
 		return
 	}
-	if err := h.postService.DislikeComment(id); err != nil {
+	if err := h.postService.DownvoteComment(id); err != nil {
 		handleServiceError(w, err)
 		return
 	}

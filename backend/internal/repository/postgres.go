@@ -126,12 +126,14 @@ func (r *PostgresPostRepository) Create(post *model.Post) error {
 	).Scan(&post.ID)
 }
 
-func (r *PostgresPostRepository) IncrementLikes(id int64) error {
+func (r *PostgresPostRepository) IncrementUpvotes(id int64) error {
+	// "likes" is the persisted counter column used for post upvotes.
 	_, err := r.db.Exec("UPDATE posts SET likes = likes + 1 WHERE id = $1", id)
 	return err
 }
 
-func (r *PostgresPostRepository) IncrementDislikes(id int64) error {
+func (r *PostgresPostRepository) IncrementDownvotes(id int64) error {
+	// "dislikes" is the persisted counter column used for post downvotes.
 	_, err := r.db.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = $1", id)
 	return err
 }
@@ -182,12 +184,14 @@ func (r *PostgresCommentRepository) GetByID(id int64) (*model.Comment, error) {
 	return &c, nil
 }
 
-func (r *PostgresCommentRepository) IncrementLikes(id int64) error {
+func (r *PostgresCommentRepository) IncrementUpvotes(id int64) error {
+	// "likes" is the persisted counter column used for comment upvotes.
 	_, err := r.db.Exec("UPDATE comments SET likes = likes + 1 WHERE id = $1", id)
 	return err
 }
 
-func (r *PostgresCommentRepository) IncrementDislikes(id int64) error {
+func (r *PostgresCommentRepository) IncrementDownvotes(id int64) error {
+	// "dislikes" is the persisted counter column used for comment downvotes.
 	_, err := r.db.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = $1", id)
 	return err
 }
