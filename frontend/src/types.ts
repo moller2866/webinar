@@ -1,11 +1,37 @@
+export interface User {
+  id: number;
+  email: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string;
+  createdAt: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  createdBy?: number;
+  createdAt: string;
+}
+
+export interface Vote {
+  id: number;
+  userId: number;
+  targetType: 'post' | 'comment';
+  targetId: number;
+  voteType: 'highfive' | 'meh';
+  createdAt: string;
+}
+
 export interface Post {
   id: number;
   title: string;
   content: string;
-  author: string;
-  tags: string[];
-  likes: number;
-  dislikes: number;
+  userId?: number;
+  categoryId?: number;
+  images: string[];
   createdAt: string;
   comments?: Comment[];
 }
@@ -13,21 +39,20 @@ export interface Post {
 export interface Comment {
   id: number;
   postId: number;
-  author: string;
+  userId?: number;
+  parentId?: number;
   content: string;
-  likes: number;
-  dislikes: number;
   createdAt: string;
 }
 
 export interface CreatePostRequest {
   title: string;
   content: string;
-  author: string;
-  tags: string[];
+  categoryId?: number;
+  images?: string[];
 }
 
 export interface CreateCommentRequest {
-  author: string;
   content: string;
+  parentId?: number;
 }
