@@ -24,8 +24,22 @@ type Comment struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+type User struct {
+	ID           int64     `json:"id"`
+	DisplayName  string    `json:"displayName"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"-"`
+	CreatedAt    time.Time `json:"createdAt"`
+}
+
 type ValidationError struct {
 	Message string
 }
 
 func (e *ValidationError) Error() string { return e.Message }
+
+type ConflictError struct {
+	Message string
+}
+
+func (e *ConflictError) Error() string { return e.Message }

@@ -32,21 +32,30 @@ type ErrorResponse struct {
 // Handler wires HTTP routes to the PostService.
 type Handler struct {
 	postService *service.PostService
+	authHandler *AuthHandler
+	jwtSecret   []byte
 }
 
-func NewHandler(postService *service.PostService) *Handler {
-	return &Handler{postService: postService}
+func NewHandler(postService *service.PostService, authHandler *AuthHandler, jwtSecret []byte) *Handler {
+	return &Handler{postService: postService, authHandler: authHandler, jwtSecret: jwtSecret}
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
+	// Auth endpoints (public)
+	mux.HandleFunc("POST /api/auth/register", h.authHandler.register)
+	mux.HandleFunc("POST /api/auth/login", h.authHandler.login)
+
+	// Read endpoints (public)
 	mux.HandleFunc("GET /api/posts", h.listPosts)
-	mux.HandleFunc("POST /api/posts", h.createPost)
 	mux.HandleFunc("GET /api/posts/{id}", h.getPost)
-	mux.HandleFunc("POST /api/posts/{id}/comments", h.addComment)
-	mux.HandleFunc("POST /api/posts/{id}/like", h.likePost)
-	mux.HandleFunc("POST /api/posts/{id}/dislike", h.dislikePost)
-	mux.HandleFunc("POST /api/comments/{id}/like", h.likeComment)
-	mux.HandleFunc("POST /api/comments/{id}/dislike", h.dislikeComment)
+
+	// Write endpoints (require auth)
+	mux.Handle("POST /api/posts", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.createPost)))
+	mux.Handle("POST /api/posts/{id}/comments", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.addComment)))
+	mux.Handle("POST /api/posts/{id}/like", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.likePost)))
+	mux.Handle("POST /api/posts/{id}/dislike", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.dislikePost)))
+	mux.Handle("POST /api/comments/{id}/like", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.likeComment)))
+	mux.Handle("POST /api/comments/{id}/dislike", AuthMiddleware(h.jwtSecret, http.HandlerFunc(h.dislikeComment)))
 }
 
 // --- Handlers ---

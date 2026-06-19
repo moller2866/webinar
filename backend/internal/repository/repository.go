@@ -17,3 +17,9 @@ type CommentRepository interface {
 	IncrementLikes(id int64) error
 	IncrementDislikes(id int64) error
 }
+
+type UserRepository interface {
+	Create(user *model.User) error
+	GetByEmail(email string) (*model.User, error)
+	GetByID(id int64) (*model.User, error)
+}

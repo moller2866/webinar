@@ -16,6 +16,11 @@ func main() {
 		databaseURL = v
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable is required")
+	}
+
 	db, err := repository.NewPostgresDB(databaseURL)
 	if err != nil {
 		log.Fatal("failed to open database:", err)
@@ -24,10 +29,13 @@ func main() {
 
 	postRepo := repository.NewPostgresPostRepository(db)
 	commentRepo := repository.NewPostgresCommentRepository(db)
+	userRepo := repository.NewPostgresUserRepository(db)
 
 	postService := service.NewPostService(postRepo, commentRepo)
+	userService := service.NewUserService(userRepo)
 
-	h := handler.NewHandler(postService)
+	authHandler := handler.NewAuthHandler(userService, []byte(jwtSecret))
+	h := handler.NewHandler(postService, authHandler, []byte(jwtSecret))
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -41,7 +49,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return

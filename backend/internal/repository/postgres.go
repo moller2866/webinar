@@ -36,6 +36,16 @@ func NewPostgresDB(databaseURL string) (*sql.DB, error) {
 
 func initSchema(db *sql.DB) error {
 	schema := `
+	CREATE TABLE IF NOT EXISTS users (
+		id BIGSERIAL PRIMARY KEY,
+		display_name TEXT NOT NULL,
+		email TEXT NOT NULL UNIQUE,
+		password_hash TEXT NOT NULL,
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
 	CREATE TABLE IF NOT EXISTS posts (
 		id BIGSERIAL PRIMARY KEY,
 		title TEXT NOT NULL,
@@ -197,4 +207,51 @@ func (r *PostgresCommentRepository) Create(comment *model.Comment) error {
 		"INSERT INTO comments (post_id, author, content, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
 		comment.PostID, comment.Author, comment.Content, comment.CreatedAt,
 	).Scan(&comment.ID)
+}
+
+// --- User Repository ---
+
+type PostgresUserRepository struct {
+	db *sql.DB
+}
+
+func NewPostgresUserRepository(db *sql.DB) *PostgresUserRepository {
+	return &PostgresUserRepository{db: db}
+}
+
+func (r *PostgresUserRepository) Create(user *model.User) error {
+	return r.db.QueryRow(
+		"INSERT INTO users (display_name, email, password_hash, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
+		user.DisplayName, user.Email, user.PasswordHash, user.CreatedAt,
+	).Scan(&user.ID)
+}
+
+func (r *PostgresUserRepository) GetByEmail(email string) (*model.User, error) {
+	row := r.db.QueryRow(
+		"SELECT id, display_name, email, password_hash, created_at FROM users WHERE email = $1", email,
+	)
+	var u model.User
+	err := row.Scan(&u.ID, &u.DisplayName, &u.Email, &u.PasswordHash, &u.CreatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
+func (r *PostgresUserRepository) GetByID(id int64) (*model.User, error) {
+	row := r.db.QueryRow(
+		"SELECT id, display_name, email, password_hash, created_at FROM users WHERE id = $1", id,
+	)
+	var u model.User
+	err := row.Scan(&u.ID, &u.DisplayName, &u.Email, &u.PasswordHash, &u.CreatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
 }
